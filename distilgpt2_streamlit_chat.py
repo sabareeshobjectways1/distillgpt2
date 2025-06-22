@@ -1,21 +1,32 @@
+import os
+import subprocess
 import streamlit as st
 
+# Ensure dependencies are installed and pip is updated
 try:
-    from transformers import pipeline, set_seed
-except ImportError:
-    st.error("Missing dependencies. Please run:\n\npip install streamlit transformers torch")
-    st.stop()
+    import pip
+    subprocess.check_call(["pip", "install", "--upgrade", "pip"])
+    import torch
+    import transformers
+except Exception:
+    with st.spinner("Installing required dependencies..."):
+        subprocess.check_call(["pip", "install", "--upgrade", "pip"])
+        subprocess.check_call(["pip", "install", "torch", "transformers", "streamlit"])
+    import torch
+    import transformers
 
-# Page config
+from transformers import pipeline, set_seed
+
+# UI setup
 st.set_page_config(page_title="Chat with DistilGPT2", layout="centered")
-st.title("💬 Chat with DistilGPT2")
-st.caption("Powered by 🤗 Hugging Face Transformers — No API Keys Required")
+st.title("ðŸ’¬ Chat with DistilGPT2")
+st.caption("Powered by ðŸ¤— Hugging Face Transformers â€” Local, Free, No API Keys")
 
 # Session state
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-# Load model only once
+# Model loader
 @st.cache_resource(show_spinner=True)
 def load_model():
     generator = pipeline("text-generation", model="distilgpt2")
@@ -25,29 +36,29 @@ def load_model():
 try:
     generator = load_model()
 except Exception as e:
-    st.error("🚨 Failed to load DistilGPT2 model.")
+    st.error("ðŸš¨ Failed to load model.")
     st.exception(e)
     st.stop()
 
-# Input
-prompt = st.text_input("Your message:", placeholder="Type a message and hit Enter")
+# Input field
+prompt = st.text_input("Your message:", key="user_input", placeholder="Type a message and hit Enter")
 
 if prompt:
     with st.spinner("Generating response..."):
         try:
-            output = generator(prompt, max_new_tokens=60, do_sample=True, temperature=0.7)[0]["generated_text"]
-            st.session_state.chat_history.append(("🧑 You", prompt))
-            st.session_state.chat_history.append(("🤖 DistilGPT2", output))
+            result = generator(prompt, max_new_tokens=60, do_sample=True, temperature=0.7)
+            response = result[0]["generated_text"]
+            st.session_state.chat_history.append(("ðŸ§‘ You", prompt))
+            st.session_state.chat_history.append(("ðŸ¤– DistilGPT2", response))
         except Exception as e:
-            st.error("❌ Error during response generation.")
+            st.error("âŒ Error during generation.")
             st.exception(e)
 
 # Display chat
-st.markdown("### 🗨️ Conversation")
-for sender, text in st.session_state.chat_history:
-    st.markdown(f"**{sender}:** {text}")
+st.markdown("### ðŸ—¨ï¸ Conversation")
+for sender, msg in st.session_state.chat_history:
+    st.markdown(f"**{sender}:** {msg}")
 
-# Clear button
-if st.button("🧹 Clear Chat"):
+# Clear chat
+if st.button("ðŸ§¹ Clear Chat"):
     st.session_state.chat_history = []
-    
