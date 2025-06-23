@@ -1,0 +1,12 @@
+{
+  "name": "groq-vercel-chat",
+  "version": "1.0.0",
+  "main": "api/chat.ts",
+  "scripts": {
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "openai": "^4.0.0",
+    "ai": "^0.1.0"
+  }
+}
