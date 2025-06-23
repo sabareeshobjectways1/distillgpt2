@@ -1,6 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import OpenAI from 'openai';
-import { OpenAIStream, StreamingTextResponse } from 'ai';
 
 const openai = new OpenAI({
   apiKey: process.env.GROQ_API_KEY,
@@ -14,12 +13,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  const response = await openai.chat.completions.create({
+  const completion = await openai.chat.completions.create({
     model: 'llama3-70b-8192',
-    stream: true,
     messages: [{ role: 'user', content: prompt }],
   });
 
-  const stream = OpenAIStream(response);
-  return new StreamingTextResponse(stream);
+  const output = completion.choices[0]?.message?.content || 'No response';
+  res.status(200).json({ response: output });
 }
